@@ -1,78 +1,67 @@
-# 🛡️ MIMEType Content Security Filter
+# 🛡️ MIME-Guard: File Integrity Enforcer
 
-![Language](https://img.shields.io/badge/Language-Java%20%7C%20Python-blue?logo=secure)
-![Security Standard](https://img.shields.io/badge/Standard-OWASP-black)
-![Category](https://img.shields.io/badge/Category-SecOps%20%7C%20AppSec-red)
+![Stack](https://img.shields.io/badge/Tech-Python%203.x-blue?style=flat&logo=python)
+![Focus](https://img.shields.io/badge/Focus-Input%20Validation-red)
+![Standard](https://img.shields.io/badge/Compliance-OWASP%20ASVS-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**MIMETypeSecurityFilter**, web uygulamalarında dosya yükleme güvenliğini sağlamak için geliştirilmiş, içerik türlerini (MIME) derinlemesine analiz eden bir güvenlik katmanıdır.
+**MIME-Guard**, web uygulamalarına yönelik dosya yükleme saldırılarını nötralize etmek amacıyla tasarlanmış, binary tabanlı bir içerik doğrulama motorudur.
 
 ---
 
-## 📑 İçindekiler
+## 🏛️ Mimari Yapı ve Ortam Yönetimi
 
-- [Proje Hakkında](#-proje-hakkında)
-- [Özellikler ve Analiz Yetenekleri](#-özellikler-ve-analiz-yetenekleri)
-- [Teknik Metodoloji](#-teknik-metodoloji)
-- [Kurulum](#-kurulum)
-- [Kullanım](#-kullanım)
-- [Yasal Uyarı](#-yasal-uyarı)
+Proje, sürdürülebilir ve izole bir güvenlik katmanı oluşturmak adına aşağıdaki prensiplerle inşa edilmiştir:
 
----
+### 📦 Bağımlılık ve İzolasyon Stratejisi
+* **Sanal Çalışma Alanı (`venv`):** Proje, sistem kütüphanelerinden bağımsız, kendine ait izole bir `runtime` üzerinde çalıştırılır. Bu sayede versiyon uyuşmazlıklarının önüne geçilir.
+* **Paket Standardizasyonu (`requirements.txt`):** Güvenlik motorunun ihtiyaç duyduğu `python-magic` gibi kritik kütüphaneler ve sürümleri bu manifest dosyasında kilitlenmiştir.
 
-## 🎯 Proje Hakkında
-
-Bu proje, dosya uzantısı manipülasyonu ve "Content Sniffing" saldırılarına karşı koruma sağlar. Sadece `Content-Type` header bilgisine güvenmek yerine, dosyanın **Magic Bytes** yapısını kontrol ederek gerçek içeriği doğrular ve yetkisiz dosya yürütme girişimlerini engeller.
+### ⚙️ Konfigürasyon ve Güvenlik
+* **Çevresel Değişkenler (`.env`):** Uygulama içi sabit kodlama (hard-coding) yerine, güvenlik politikaları ve izin verilen uzantılar dış kaynaklı `.env` dosyasından dinamik olarak çekilir.
+* **Repo Hijyeni (`.gitignore`):** Hassas konfigürasyon dosyaları, önbellekler (`__pycache__`) ve yerel ortam dosyalarının versiyon kontrol sistemine karışması engellenmiştir.
 
 ---
 
-## 🚀 Özellikler ve Analiz Yetenekleri
+## 🔧 Kurulum ve Dağıtım (Deployment)
 
-### 1. 🔍 Magic Bytes Analizi
-Dosyaların binary imzalarını kontrol ederek sahte uzantıları tespit eder.
-- **Header Doğrulama:** Gönderilen tür ile gerçek veri yapısı arasındaki tutarlılığı ölçer.
-- **Kötü Niyetli Kod Engelleme:** Resim dosyası içine gizlenmiş scriptleri (PHP, JS vb.) bloke eder.
-
-### 2. 🛡️ Tarayıcı Güvenliği (No-Sniff)
-- **X-Content-Type-Options:** Yanıtlara eklenen `nosniff` parametresi ile tarayıcıların dosyayı yanlış yorumlamasını önler.
-
-### 3. 📂 Güvenli Liste (Whitelist)
-- Sadece önceden tanımlanmış güvenli MIME türlerinin (JPEG, PNG, PDF vb.) sisteme girişine izin verir.
-
----
-
-## 🛠️ Teknik Metodoloji
-
-| Standart / Teknik | Açıklama |
-| :--- | :--- |
-| **OWASP File Upload** | Küresel güvenlik standartlarına uygun dosya doğrulama süreçleri. |
-| **Magic Numbers** | Dosya türlerini belirlemek için kullanılan benzersiz byte imzaları. |
-| **Integrity Check** | Dosya bütünlüğünün ve güvenliğinin uçtan uca kontrolü. |
-
----
-
-## 📥 Kurulum
-
-Projeyi yerel makinenize klonlayın ve gerekli bağımlılıkları yükleyin.
+Projeyi geliştirme ortamına almak için terminal üzerinden şu adımları izleyin:
 
 ```bash
-# Repoyu klonlayın
+# 1. Kaynak kodları yerel diske alın
 git clone [https://github.com/EfeSidal/MIMETypeSecurityFilter.git](https://github.com/EfeSidal/MIMETypeSecurityFilter.git)
-
-# Proje dizinine girin
 cd MIMETypeSecurityFilter
 
-# Gerekli kütüphaneleri yükleyin
+# 2. İzole Python ortamını oluşturun ve başlatın
+python -m venv venv
+
+# Windows Kullanıcıları için:
+venv\Scripts\activate
+# Linux/macOS Kullanıcıları için:
+source venv/bin/activate
+
+# 3. Kütüphaneleri yükleyin ve çevre ayarlarını yapın
 pip install -r requirements.txt
-from security_filter import MIMETypeFilter
+cp .env.example .env
+import os
+from dotenv import load_dotenv
+from core.security import ContentValidator
 
-# Filtreyi tanımla (Sadece güvenli dosya türleri)
-mimetype_filter = MIMETypeFilter(allowed_types=['image/jpeg', 'image/png', 'application/pdf'])
+# Çevresel değişkenleri aktif et
+load_dotenv()
 
-# Yüklenen dosyayı doğrula
-is_secure = mimetype_filter.validate(request.files['upload_file'])
+# Validatör motorunu başlat
+validator = ContentValidator(
+    whitelist=os.getenv("ALLOWED_EXTENSIONS").split(',')
+)
 
-if not is_secure:
-    return "Güvenlik İhlali: Geçersiz Dosya İçeriği!", 403
-
-
+def handle_upload(file_stream):
+    # Binary analiz ve imza kontrolü
+    scan_result = validator.inspect(file_stream)
+    
+    if scan_result['is_safe']:
+        process_file(file_stream)
+        return "200 OK: Dosya temiz."
+    else:
+        log_incident(scan_result['threat_type'])
+        return "406 Not Acceptable: Güvenlik politikası ihlali."
