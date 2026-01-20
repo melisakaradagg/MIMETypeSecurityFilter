@@ -1,87 +1,80 @@
 # 🛡️ MIMEType Content Security Filter
 
 ![Language](https://img.shields.io/badge/Language-Java%20%7C%20Python-blue?logo=secure)
-![Security Standard](https://img.shields.io/badge/Security-NIST%20%7C%20OWASP-black)
-![Category](https://img.shields.io/badge/Category-AppSec%20%7C%20Content%20Safety-orange)
+![Security Standard](https://img.shields.io/badge/Standard-OWASP-black)
+![Category](https://img.shields.io/badge/Category-SecOps%20%7C%20AppSec-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**MIMETypeSecurityFilter**, web uygulamalarına yüklenen veya sunulan dosyaların içerik türlerini (MIME) derinlemesine analiz eden, "Content Sniffing" saldırılarını ve kötü niyetli dosya yürütme girişimlerini engelleyen gelişmiş bir güvenlik filtresidir.
+**MIMETypeSecurityFilter**, web uygulamalarında dosya yükleme güvenliğini sağlamak için geliştirilmiş, içerik türlerini (MIME) derinlemesine analiz eden bir güvenlik katmanıdır.
 
 ---
 
 ## 📑 İçindekiler
 
 - [Proje Hakkında](#-proje-hakkında)
-- [Temel Güvenlik Fonksiyonları](#-temel-güvenlik-fonksiyonları)
+- [Özellikler ve Analiz Yetenekleri](#-özellikler-ve-analiz-yetenekleri)
 - [Teknik Metodoloji](#-teknik-metodoloji)
-- [Kurulum ve Entegrasyon](#-kurulum-ve-entegrasyon)
-- [Örnek Senaryo](#-örnek-senaryo)
+- [Kurulum](#-kurulum)
+- [Kullanım](#-kullanım)
 - [Yasal Uyarı](#-yasal-uyarı)
 
 ---
 
-## Proje Hakkında
+## 🎯 Proje Hakkında
 
-Modern web saldırılarında, saldırganlar genellikle dosya uzantılarını manipüle ederek sistemlere sızmaya çalışırlar (Örn: `.jpg` görünümlü bir `.php` shell dosyası). 
-
-Bu filtre, sadece dosya uzantısına veya tarayıcıdan gelen `Content-Type` header bilgisine güvenmek yerine, dosyanın **binary (ikili) yapısını** inceleyerek gerçek kimliğini doğrular. Proje, kurumsal düzeydeki uygulamalarda **Unrestricted File Upload** zafiyetini minimize etmek için tasarlanmıştır.
+Bu proje, dosya uzantısı manipülasyonu ve "Content Sniffing" saldırılarına karşı koruma sağlar. Sadece `Content-Type` header bilgisine güvenmek yerine, dosyanın **Magic Bytes** yapısını kontrol ederek gerçek içeriği doğrular ve yetkisiz dosya yürütme girişimlerini engeller.
 
 ---
 
-## Temel Güvenlik Fonksiyonları
+## 🚀 Özellikler ve Analiz Yetenekleri
 
-Proje, dosya güvenliği üzerinde 3 ana katmanda koruma sağlar:
+### 1. 🔍 Magic Bytes Analizi
+Dosyaların binary imzalarını kontrol ederek sahte uzantıları tespit eder.
+- **Header Doğrulama:** Gönderilen tür ile gerçek veri yapısı arasındaki tutarlılığı ölçer.
+- **Kötü Niyetli Kod Engelleme:** Resim dosyası içine gizlenmiş scriptleri (PHP, JS vb.) bloke eder.
 
-### 1. Magic Bytes (Signature) Doğrulaması
-Dosyanın ilk baytlarını analiz ederek gerçek türünü belirler.
-- **Header Eşleşmesi:** Gelen HTTP header bilgisi ile dosya imzasının (Magic Numbers) tutarlılığını kontrol eder.
-- **Sahtecilik Tespiti:** Resim dosyası gibi görünüp içinde executable (çalıştırılabilir) kod barındıran dosyaları anında bloklar.
+### 2. 🛡️ Tarayıcı Güvenliği (No-Sniff)
+- **X-Content-Type-Options:** Yanıtlara eklenen `nosniff` parametresi ile tarayıcıların dosyayı yanlış yorumlamasını önler.
 
-
-
-### 2. Content Sniffing Koruması
-Tarayıcıların MIME türlerini tahmin etme (sniffing) özelliğini devre dışı bırakır.
-- **X-Content-Type-Options:** Tüm yanıtlara `nosniff` parametresini otomatik olarak enjekte eder.
-- **MIME Confusion:** Tarayıcının bir metin dosyasını script olarak yorumlamasından kaynaklanan XSS risklerini ortadan kaldırır.
-
-### 3.Uzantı ve Metadata Temizliği
-- **Whitelist Kontrolü:** Sadece izin verilen güvenli uzantıların sisteme girmesine izin verir.
-- **Null Byte Injection:** Dosya isimlerindeki `%00` (Null Byte) gibi bypass tekniklerini temizler.
+### 3. 📂 Güvenli Liste (Whitelist)
+- Sadece önceden tanımlanmış güvenli MIME türlerinin (JPEG, PNG, PDF vb.) sisteme girişine izin verir.
 
 ---
 
-## Teknik Metodoloji
+## 🛠️ Teknik Metodoloji
 
-Bu filtre, analizlerini gerçekleştirirken aşağıdaki endüstri standartlarını referans alır:
-
-| Teknik | Açıklama |
+| Standart / Teknik | Açıklama |
 | :--- | :--- |
-| **Deep Packet Inspection** | Dosya içeriğinin byte bazlı taranarak zararlı patternlerin (desenlerin) bulunması. |
-| **OWASP File Upload** | OWASP'ın dosya yükleme güvenliği için önerdiği "MIME Validation" pratikleri. |
-| **Entropy Check** | Dosya içindeki verinin rastgeleliğini ölçerek gizlenmiş (obfuscated) kod tespiti. |
+| **OWASP File Upload** | Küresel güvenlik standartlarına uygun dosya doğrulama süreçleri. |
+| **Magic Numbers** | Dosya türlerini belirlemek için kullanılan benzersiz byte imzaları. |
+| **Integrity Check** | Dosya bütünlüğünün ve güvenliğinin uçtan uca kontrolü. |
 
 ---
 
-## Kurulum
+## 📥 Kurulum
 
-Projeyi mevcut middleware yapınıza entegre etmek için:
+Projeyi yerel makinenize klonlayın ve gerekli bağımlılıkları yükleyin.
 
 ```bash
-# Projeyi klonlayın
+# Repoyu klonlayın
 git clone [https://github.com/EfeSidal/MIMETypeSecurityFilter.git](https://github.com/EfeSidal/MIMETypeSecurityFilter.git)
 
-# Bağımlılıkları kontrol edin
+# Proje dizinine girin
 cd MIMETypeSecurityFilter
-pip install -r requirements.txt
 
+# Gerekli kütüphaneleri yükleyin
+pip install -r requirements.txt
 from security_filter import MIMETypeFilter
 
-# Filtreyi tanımla
+# Filtreyi tanımla (Sadece güvenli dosya türleri)
 mimetype_filter = MIMETypeFilter(allowed_types=['image/jpeg', 'image/png', 'application/pdf'])
 
 # Yüklenen dosyayı doğrula
 is_secure = mimetype_filter.validate(request.files['upload_file'])
 
-Developed by <b>MelisaKaradağ</b> for Safer Content Delivery 
+if not is_secure:
+    return "Güvenlik İhlali: Geçersiz Dosya İçeriği!", 403
+
+<div align="center"> Developed by <b>MelisaKaradağ</b> for Safer Content Delivery </div>
 
 Öğrenci Numarası: 2420191031
