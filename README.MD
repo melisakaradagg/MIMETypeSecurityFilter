@@ -82,8 +82,6 @@ mimetype_filter = MIMETypeFilter(allowed_types=['image/jpeg', 'image/png', 'appl
 # Yüklenen dosyayı doğrula
 is_secure = mimetype_filter.validate(request.files['upload_file'])
 
-if not is_secure:
-    return "Güvenlik İhlali: Geçersiz Dosya İçeriği!", 403
-<div align="center"> Developed by <b>MelisaKaradağ</b> for Safer Content Delivery </div>
+Developed by <b>MelisaKaradağ</b> for Safer Content Delivery 
 
 Öğrenci Numarası: 2420191031
